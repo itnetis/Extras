@@ -1,0 +1,1245 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Predicting Academic Outcomes Using Machine Learning</title>
+    <style>
+        @import url('https://fonts.googleapis.com/css2?family=Playfair+Display:wght@700;900&family=Space+Mono:wght@400;700&family=Work+Sans:wght@300;400;600&display=swap');
+        
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+        
+        :root {
+            --primary: #1E2761;
+            --secondary: #CADCFC;
+            --accent: #0891B2;
+            --dark: #0F172A;
+            --light: #F1F5F9;
+            --text: #1E293B;
+        }
+        
+        body {
+            font-family: 'Work Sans', sans-serif;
+            overflow-x: hidden;
+            background: var(--dark);
+            color: white;
+        }
+        
+        .presentation-container {
+            width: 100vw;
+            height: 100vh;
+            overflow: hidden;
+            position: relative;
+        }
+        
+        .slide {
+            width: 100vw;
+            height: 100vh;
+            position: absolute;
+            top: 0;
+            left: 0;
+            opacity: 0;
+            transition: opacity 0.8s ease;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            padding: 4rem;
+        }
+        
+        .slide.active {
+            opacity: 1;
+            z-index: 10;
+        }
+        
+        /* Particle Background */
+        .particles {
+            position: absolute;
+            width: 100%;
+            height: 100%;
+            overflow: hidden;
+            pointer-events: none;
+        }
+        
+        .particle {
+            position: absolute;
+            width: 3px;
+            height: 3px;
+            background: var(--accent);
+            border-radius: 50%;
+            opacity: 0;
+            animation: float-up 15s infinite linear;
+        }
+        
+        @keyframes float-up {
+            0% {
+                transform: translateY(100vh) translateX(0);
+                opacity: 0;
+            }
+            10% {
+                opacity: 0.8;
+            }
+            90% {
+                opacity: 0.8;
+            }
+            100% {
+                transform: translateY(-100vh) translateX(100px);
+                opacity: 0;
+            }
+        }
+        
+        /* Data Nodes Animation */
+        .data-nodes {
+            position: absolute;
+            width: 100%;
+            height: 100%;
+            pointer-events: none;
+        }
+        
+        .data-node {
+            position: absolute;
+            width: 8px;
+            height: 8px;
+            background: var(--accent);
+            border-radius: 50%;
+            box-shadow: 0 0 20px var(--accent);
+            animation: node-float 8s infinite ease-in-out;
+        }
+        
+        @keyframes node-float {
+            0%, 100% {
+                transform: translate(0, 0);
+            }
+            25% {
+                transform: translate(30px, -30px);
+            }
+            50% {
+                transform: translate(-20px, 20px);
+            }
+            75% {
+                transform: translate(20px, 30px);
+            }
+        }
+        
+        /* Slide 1: Title */
+        .title-slide {
+            background: linear-gradient(135deg, var(--primary) 0%, var(--dark) 100%);
+            position: relative;
+            overflow: hidden;
+        }
+        
+        .title-slide::before {
+            content: '';
+            position: absolute;
+            width: 200%;
+            height: 200%;
+            background: radial-gradient(circle, var(--accent) 1px, transparent 1px);
+            background-size: 50px 50px;
+            opacity: 0.1;
+            animation: grid-move 20s linear infinite;
+        }
+        
+        @keyframes grid-move {
+            0% {
+                transform: translate(0, 0);
+            }
+            100% {
+                transform: translate(50px, 50px);
+            }
+        }
+        
+        .title-content {
+            z-index: 2;
+            text-align: center;
+            max-width: 1200px;
+        }
+        
+        .title-content h1 {
+            font-family: 'Playfair Display', serif;
+            font-size: 5rem;
+            font-weight: 900;
+            margin-bottom: 1rem;
+            background: linear-gradient(135deg, white, var(--secondary));
+            -webkit-background-clip: text;
+            -webkit-text-fill-color: transparent;
+            background-clip: text;
+            animation: title-fade-in 1.5s ease-out;
+        }
+        
+        .title-content h2 {
+            font-family: 'Space Mono', monospace;
+            font-size: 2rem;
+            color: var(--accent);
+            margin-bottom: 3rem;
+            animation: subtitle-slide-in 1.5s ease-out 0.5s both;
+        }
+        
+        .authors {
+            font-size: 1.2rem;
+            color: var(--secondary);
+            animation: authors-fade-in 1.5s ease-out 1s both;
+        }
+        
+        @keyframes title-fade-in {
+            from {
+                opacity: 0;
+                transform: translateY(-50px);
+            }
+            to {
+                opacity: 1;
+                transform: translateY(0);
+            }
+        }
+        
+        @keyframes subtitle-slide-in {
+            from {
+                opacity: 0;
+                transform: translateX(-50px);
+            }
+            to {
+                opacity: 1;
+                transform: translateX(0);
+            }
+        }
+        
+        @keyframes authors-fade-in {
+            from {
+                opacity: 0;
+            }
+            to {
+                opacity: 1;
+            }
+        }
+        
+        /* Floating Data Symbols */
+        .data-symbol {
+            position: absolute;
+            font-family: 'Space Mono', monospace;
+            color: var(--accent);
+            opacity: 0.2;
+            font-size: 3rem;
+            animation: symbol-float 12s infinite ease-in-out;
+        }
+        
+        @keyframes symbol-float {
+            0%, 100% {
+                transform: translate(0, 0) rotate(0deg);
+                opacity: 0.2;
+            }
+            50% {
+                transform: translate(50px, -50px) rotate(180deg);
+                opacity: 0.4;
+            }
+        }
+        
+        /* Slide 2: Dataset Overview */
+        .dataset-slide {
+            background: linear-gradient(135deg, #0F172A 0%, #1E293B 100%);
+        }
+        
+        .dataset-content {
+            display: flex;
+            flex-direction: column;
+            gap: 3rem;
+            max-width: 1400px;
+            width: 100%;
+        }
+        
+        .dataset-header {
+            text-align: left;
+        }
+        
+        .dataset-grid {
+            display: grid;
+            grid-template-columns: 1fr 2fr;
+            gap: 3rem;
+            align-items: start;
+        }
+        
+        .stat-card {
+            background: linear-gradient(135deg, rgba(8, 145, 178, 0.15), rgba(8, 145, 178, 0.05));
+            border: 2px solid var(--accent);
+            border-radius: 20px;
+            padding: 3rem;
+            position: relative;
+            overflow: hidden;
+            transition: transform 0.3s ease;
+            height: 100%;
+        }
+        
+        .stat-card:hover {
+            transform: translateY(-10px) scale(1.02);
+            border-color: #14B8A6;
+        }
+        
+        .stat-card::before {
+            content: '';
+            position: absolute;
+            top: -50%;
+            left: -50%;
+            width: 200%;
+            height: 200%;
+            background: linear-gradient(45deg, transparent, rgba(8, 145, 178, 0.2), transparent);
+            animation: card-shine 3s infinite;
+        }
+        
+        @keyframes card-shine {
+            0% {
+                transform: translateX(-100%) translateY(-100%);
+            }
+            100% {
+                transform: translateX(100%) translateY(100%);
+            }
+        }
+        
+        .stat-number {
+            font-family: 'Playfair Display', serif;
+            font-size: 5rem;
+            font-weight: 900;
+            color: var(--accent);
+            margin-bottom: 1rem;
+            position: relative;
+            z-index: 1;
+        }
+        
+        .stat-label {
+            font-size: 1.5rem;
+            color: var(--secondary);
+            position: relative;
+            z-index: 1;
+        }
+        
+        .stat-description {
+            margin-top: 1rem;
+            color: rgba(255, 255, 255, 0.7);
+            font-size: 1rem;
+            position: relative;
+            z-index: 1;
+        }
+        
+        .data-points {
+            position: relative;
+            z-index: 1;
+        }
+        
+        .data-point {
+            display: flex;
+            align-items: center;
+            gap: 1rem;
+            margin: 1.5rem 0;
+            padding: 1rem;
+            background: rgba(255, 255, 255, 0.05);
+            border-radius: 10px;
+            border-left: 3px solid var(--accent);
+        }
+        
+        .data-point-icon {
+            width: 12px;
+            height: 12px;
+            background: var(--accent);
+            border-radius: 50%;
+            flex-shrink: 0;
+            box-shadow: 0 0 10px var(--accent);
+        }
+        
+        .data-point-text {
+            color: rgba(255, 255, 255, 0.9);
+            font-size: 1rem;
+            line-height: 1.6;
+        }
+        
+        .data-point-text strong {
+            color: var(--accent);
+            font-weight: 600;
+        }
+        
+        /* Animated Counter */
+        .counter {
+            display: inline-block;
+        }
+        
+        /* Slide 3: Model Performance */
+        .performance-slide {
+            background: linear-gradient(135deg, #1E2761 0%, #0F172A 100%);
+        }
+        
+        .performance-content {
+            max-width: 1600px;
+            width: 100%;
+        }
+        
+        .performance-header {
+            text-align: left;
+            margin-bottom: 2rem;
+        }
+        
+        .chart-section {
+            display: grid;
+            grid-template-columns: 1.5fr 1fr;
+            gap: 4rem;
+            align-items: center;
+        }
+        
+        .chart-container {
+            display: flex;
+            justify-content: space-around;
+            align-items: flex-end;
+            height: 450px;
+            padding: 2rem;
+            background: rgba(255, 255, 255, 0.03);
+            border-radius: 20px;
+            border: 1px solid rgba(8, 145, 178, 0.3);
+            position: relative;
+        }
+        
+        .chart-container::before {
+            content: 'Accuracy (%)';
+            position: absolute;
+            top: 1rem;
+            left: 1rem;
+            font-family: 'Space Mono', monospace;
+            font-size: 0.9rem;
+            color: var(--secondary);
+        }
+        
+        .metrics-panel {
+            display: flex;
+            flex-direction: column;
+            gap: 1.5rem;
+        }
+        
+        .metric-card {
+            background: linear-gradient(135deg, rgba(8, 145, 178, 0.15), rgba(8, 145, 178, 0.05));
+            border: 2px solid rgba(8, 145, 178, 0.3);
+            border-radius: 15px;
+            padding: 1.5rem;
+            transition: all 0.3s ease;
+        }
+        
+        .metric-card:hover {
+            border-color: var(--accent);
+            transform: translateX(10px);
+        }
+        
+        .metric-card.winner {
+            border-color: var(--accent);
+            background: linear-gradient(135deg, rgba(8, 145, 178, 0.25), rgba(8, 145, 178, 0.1));
+        }
+        
+        .metric-name {
+            font-size: 1.2rem;
+            font-weight: 600;
+            color: white;
+            margin-bottom: 0.5rem;
+        }
+        
+        .metric-stats {
+            display: grid;
+            grid-template-columns: repeat(3, 1fr);
+            gap: 1rem;
+            margin-top: 1rem;
+        }
+        
+        .metric-stat {
+            text-align: center;
+        }
+        
+        .metric-stat-label {
+            font-size: 0.75rem;
+            color: var(--secondary);
+            text-transform: uppercase;
+            letter-spacing: 1px;
+        }
+        
+        .metric-stat-value {
+            font-family: 'Space Mono', monospace;
+            font-size: 1.3rem;
+            font-weight: 700;
+            color: var(--accent);
+            margin-top: 0.3rem;
+        }
+        
+        .bar-wrapper {
+            flex: 1;
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            margin: 0 2rem;
+        }
+        
+        .bar {
+            width: 100%;
+            max-width: 200px;
+            background: linear-gradient(to top, var(--accent), #14B8A6);
+            border-radius: 10px 10px 0 0;
+            position: relative;
+            transform-origin: bottom;
+            animation: bar-grow 2s ease-out forwards;
+            box-shadow: 0 -10px 40px rgba(8, 145, 178, 0.5);
+        }
+        
+        @keyframes bar-grow {
+            from {
+                transform: scaleY(0);
+            }
+            to {
+                transform: scaleY(1);
+            }
+        }
+        
+        .bar-label {
+            margin-top: 1rem;
+            font-size: 1.2rem;
+            text-align: center;
+            color: var(--secondary);
+        }
+        
+        .bar-value {
+            position: absolute;
+            top: -40px;
+            left: 50%;
+            transform: translateX(-50%);
+            font-family: 'Space Mono', monospace;
+            font-size: 1.5rem;
+            font-weight: bold;
+            color: white;
+            animation: value-fade-in 2s ease-out 1.5s both;
+        }
+        
+        @keyframes value-fade-in {
+            from {
+                opacity: 0;
+                transform: translateX(-50%) translateY(20px);
+            }
+            to {
+                opacity: 1;
+                transform: translateX(-50%) translateY(0);
+            }
+        }
+        
+        /* Slide 4: Features */
+        .features-slide {
+            background: linear-gradient(135deg, #0F172A 0%, #1E2761 100%);
+        }
+        
+        .features-content {
+            max-width: 1400px;
+            width: 100%;
+        }
+        
+        .features-grid {
+            display: grid;
+            grid-template-columns: repeat(2, 1fr);
+            gap: 2rem;
+            margin-top: 3rem;
+        }
+        
+        .feature-card {
+            background: rgba(255, 255, 255, 0.05);
+            border: 2px solid rgba(8, 145, 178, 0.3);
+            border-radius: 15px;
+            padding: 2rem 2rem 2rem 5rem;
+            position: relative;
+            opacity: 0;
+            animation: feature-slide-in 0.6s ease-out forwards;
+            transition: all 0.3s ease;
+        }
+        
+        .feature-card:hover {
+            background: rgba(255, 255, 255, 0.08);
+            border-color: var(--accent);
+            transform: translateX(10px);
+        }
+        
+        .feature-card:nth-child(1) { animation-delay: 0.2s; }
+        .feature-card:nth-child(2) { animation-delay: 0.4s; }
+        .feature-card:nth-child(3) { animation-delay: 0.6s; }
+        .feature-card:nth-child(4) { animation-delay: 0.8s; }
+        
+        @keyframes feature-slide-in {
+            from {
+                opacity: 0;
+                transform: translateX(-50px);
+            }
+            to {
+                opacity: 1;
+                transform: translateX(0);
+            }
+        }
+        
+        .feature-number {
+            position: absolute;
+            top: 50%;
+            left: 1.5rem;
+            transform: translateY(-50%);
+            width: 50px;
+            height: 50px;
+            background: linear-gradient(135deg, var(--accent), #14B8A6);
+            border-radius: 50%;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-family: 'Playfair Display', serif;
+            font-size: 1.8rem;
+            font-weight: 900;
+            color: white;
+            box-shadow: 0 4px 20px rgba(8, 145, 178, 0.4);
+        }
+        
+        .feature-title {
+            font-size: 1.5rem;
+            font-weight: 600;
+            color: var(--accent);
+            margin-bottom: 0.5rem;
+        }
+        
+        .feature-impact {
+            color: var(--secondary);
+            font-size: 1.1rem;
+        }
+        
+        /* Slide 5: Findings */
+        .findings-slide {
+            background: linear-gradient(135deg, #1E2761 0%, #0F172A 100%);
+        }
+        
+        .findings-content {
+            max-width: 1600px;
+            width: 100%;
+        }
+        
+        .findings-grid {
+            display: grid;
+            grid-template-columns: repeat(3, 1fr);
+            gap: 3rem;
+            margin-top: 3rem;
+        }
+        
+        .finding-card {
+            background: white;
+            color: var(--dark);
+            border-radius: 20px;
+            padding: 3rem 2rem;
+            text-align: center;
+            position: relative;
+            overflow: hidden;
+            transform: translateY(50px);
+            opacity: 0;
+            animation: card-rise 0.8s ease-out forwards;
+        }
+        
+        .finding-card:nth-child(1) { animation-delay: 0.2s; }
+        .finding-card:nth-child(2) { animation-delay: 0.4s; }
+        .finding-card:nth-child(3) { animation-delay: 0.6s; }
+        
+        @keyframes card-rise {
+            to {
+                transform: translateY(0);
+                opacity: 1;
+            }
+        }
+        
+        .finding-card::before {
+            content: '';
+            position: absolute;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 5px;
+            background: linear-gradient(90deg, var(--accent), #14B8A6);
+        }
+        
+        .finding-stat {
+            font-family: 'Playfair Display', serif;
+            font-size: 5rem;
+            font-weight: 900;
+            color: var(--accent);
+            margin: 1rem 0;
+        }
+        
+        .finding-title {
+            font-size: 1.5rem;
+            font-weight: 600;
+            color: var(--primary);
+            margin-bottom: 1rem;
+        }
+        
+        .finding-desc {
+            color: var(--text);
+            font-size: 1rem;
+            line-height: 1.6;
+        }
+        
+        /* Orbiting Nodes */
+        .orbit-container {
+            position: absolute;
+            width: 300px;
+            height: 300px;
+            top: 50%;
+            left: 50%;
+            transform: translate(-50%, -50%);
+            pointer-events: none;
+        }
+        
+        .orbit-node {
+            position: absolute;
+            width: 12px;
+            height: 12px;
+            background: var(--accent);
+            border-radius: 50%;
+            top: 50%;
+            left: 50%;
+            margin: -6px 0 0 -6px;
+            box-shadow: 0 0 20px var(--accent);
+            animation: orbit 10s linear infinite;
+        }
+        
+        .orbit-node:nth-child(2) { animation-delay: -2.5s; }
+        .orbit-node:nth-child(3) { animation-delay: -5s; }
+        .orbit-node:nth-child(4) { animation-delay: -7.5s; }
+        
+        @keyframes orbit {
+            from {
+                transform: rotate(0deg) translateX(150px) rotate(0deg);
+            }
+            to {
+                transform: rotate(360deg) translateX(150px) rotate(-360deg);
+            }
+        }
+        
+        /* Navigation */
+        .nav-controls {
+            position: fixed;
+            bottom: 2rem;
+            left: 50%;
+            transform: translateX(-50%);
+            z-index: 1000;
+            display: flex;
+            gap: 1rem;
+            background: rgba(30, 39, 97, 0.8);
+            padding: 1rem 2rem;
+            border-radius: 50px;
+            backdrop-filter: blur(10px);
+        }
+        
+        .page-number {
+            position: fixed;
+            bottom: 2rem;
+            right: 3rem;
+            z-index: 1000;
+            background: rgba(30, 39, 97, 0.9);
+            padding: 1rem 1.5rem;
+            border-radius: 15px;
+            backdrop-filter: blur(10px);
+            font-family: 'Space Mono', monospace;
+            font-size: 1.2rem;
+            color: var(--accent);
+            border: 2px solid var(--accent);
+        }
+        
+        .nav-button {
+            background: var(--accent);
+            border: none;
+            color: white;
+            padding: 0.8rem 2rem;
+            border-radius: 25px;
+            cursor: pointer;
+            font-family: 'Space Mono', monospace;
+            font-size: 1rem;
+            transition: all 0.3s ease;
+        }
+        
+        .nav-button:hover {
+            background: #14B8A6;
+            transform: scale(1.05);
+        }
+        
+        .slide-indicator {
+            display: flex;
+            gap: 0.5rem;
+            align-items: center;
+        }
+        
+        .dot {
+            width: 10px;
+            height: 10px;
+            border-radius: 50%;
+            background: rgba(255, 255, 255, 0.3);
+            cursor: pointer;
+            transition: all 0.3s ease;
+        }
+        
+        .dot.active {
+            background: var(--accent);
+            transform: scale(1.5);
+        }
+        
+        /* Section Headers */
+        .section-header {
+            font-family: 'Playfair Display', serif;
+            font-size: 3.5rem;
+            font-weight: 900;
+            text-align: left;
+            margin-bottom: 3rem;
+            color: white;
+            position: relative;
+            padding-bottom: 1rem;
+        }
+        
+        .section-header::after {
+            content: '';
+            position: absolute;
+            bottom: 0;
+            left: 0;
+            width: 150px;
+            height: 4px;
+            background: linear-gradient(90deg, var(--accent), transparent);
+        }
+        
+        /* Data Stream Effect */
+        .data-stream {
+            position: absolute;
+            width: 2px;
+            height: 100px;
+            background: linear-gradient(to bottom, transparent, var(--accent), transparent);
+            opacity: 0;
+            animation: stream-fall 3s infinite linear;
+        }
+        
+        @keyframes stream-fall {
+            0% {
+                transform: translateY(-100vh);
+                opacity: 0;
+            }
+            50% {
+                opacity: 1;
+            }
+            100% {
+                transform: translateY(100vh);
+                opacity: 0;
+            }
+        }
+        
+        /* Conclusion Slide */
+        .conclusion-slide {
+            background: linear-gradient(135deg, var(--primary) 0%, var(--dark) 100%);
+        }
+        
+        .conclusion-content {
+            max-width: 1200px;
+            text-align: center;
+        }
+        
+        .conclusion-text {
+            font-size: 1.8rem;
+            line-height: 1.8;
+            color: var(--secondary);
+            margin-top: 2rem;
+        }
+        
+        .highlight {
+            color: var(--accent);
+            font-weight: 700;
+        }
+        
+        /* Responsive */
+        @media (max-width: 1200px) {
+            .title-content h1 { font-size: 3.5rem; }
+            .title-content h2 { font-size: 1.5rem; }
+            .section-header { font-size: 2.5rem; }
+            .dataset-grid { grid-template-columns: 1fr; }
+            .chart-section { grid-template-columns: 1fr; }
+            .features-grid { grid-template-columns: 1fr; }
+            .findings-grid { grid-template-columns: 1fr; gap: 2rem; }
+            .page-number { right: 1rem; bottom: 6rem; }
+        }
+        
+        @media (max-width: 768px) {
+            .title-content h1 { font-size: 2.5rem; }
+            .section-header { font-size: 2rem; }
+            .nav-controls { padding: 0.5rem 1rem; }
+            .nav-button { padding: 0.5rem 1rem; font-size: 0.9rem; }
+        }
+    </style>
+</head>
+<body>
+    <div class="presentation-container">
+        <!-- Slide 1: Title -->
+        <div class="slide active title-slide">
+            <div class="particles" id="particles"></div>
+            <div class="data-nodes" id="dataNodes"></div>
+            
+            <div class="data-symbol" style="top: 10%; left: 10%;">{ }</div>
+            <div class="data-symbol" style="top: 20%; right: 15%;">ML</div>
+            <div class="data-symbol" style="bottom: 15%; left: 20%;">AI</div>
+            <div class="data-symbol" style="bottom: 20%; right: 10%;">98%</div>
+            
+            <div class="title-content">
+                <h1>PREDICTING ACADEMIC OUTCOMES</h1>
+                <h2>Using Machine Learning</h2>
+                <div class="authors">
+                    <strong>Umair Abbasi</strong><br>
+                    Saba Mahmood • Ali Daud • Saad Shakeel • Abdul Qadeer<br>
+                    <em>Bahria University, Islamabad • Rabdan Academy, Abu Dhabi</em>
+                </div>
+            </div>
+        </div>
+
+        <!-- Slide 2: Dataset Overview -->
+        <div class="slide dataset-slide">
+            <div class="data-streams" id="dataStreams"></div>
+            <div class="dataset-content">
+                <div class="dataset-header">
+                    <h2 class="section-header">DATASET & METHODOLOGY</h2>
+                </div>
+                <div class="dataset-grid">
+                    <div class="stat-card">
+                        <div class="stat-number counter" data-target="32593">0</div>
+                        <div class="stat-label">Student Records</div>
+                        <div class="stat-description">
+                            Open University Learning Analytics Dataset (OULAD)
+                        </div>
+                    </div>
+                    <div class="stat-card">
+                        <div class="stat-label" style="font-size: 1.8rem; color: var(--accent); margin-bottom: 1.5rem;">Data Dimensions</div>
+                        <div class="data-points">
+                            <div class="data-point">
+                                <div class="data-point-icon"></div>
+                                <div class="data-point-text">
+                                    <strong>Demographics:</strong> Age band, prior education level, IMD band (socioeconomic status)
+                                </div>
+                            </div>
+                            <div class="data-point">
+                                <div class="data-point-icon"></div>
+                                <div class="data-point-text">
+                                    <strong>Engagement:</strong> VLE logins, resource access, assignment submissions
+                                </div>
+                            </div>
+                            <div class="data-point">
+                                <div class="data-point-icon"></div>
+                                <div class="data-point-text">
+                                    <strong>Outcomes:</strong> Distinction, pass, withdrawal, fail
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <!-- Slide 3: Model Performance -->
+        <div class="slide performance-slide">
+            <div class="performance-content">
+                <div class="performance-header">
+                    <h2 class="section-header">MODEL PERFORMANCE COMPARISON</h2>
+                </div>
+                
+                <div class="chart-section">
+                    <div class="chart-container">
+                        <div class="bar-wrapper">
+                            <div class="bar" style="height: 95.7%;">
+                                <div class="bar-value">95.7%</div>
+                            </div>
+                            <div class="bar-label">Decision Tree</div>
+                        </div>
+                        <div class="bar-wrapper">
+                            <div class="bar" style="height: 88.5%; animation-delay: 0.3s;">
+                                <div class="bar-value" style="animation-delay: 1.8s;">88.5%</div>
+                            </div>
+                            <div class="bar-label">Gradient Boosting</div>
+                        </div>
+                        <div class="bar-wrapper">
+                            <div class="bar" style="height: 98.3%; background: linear-gradient(to top, #0891B2, #14B8A6, #5EEAD4); animation-delay: 0.6s;">
+                                <div class="bar-value" style="animation-delay: 2.1s;">98.3%</div>
+                            </div>
+                            <div class="bar-label"><strong>Random Forest ⭐</strong></div>
+                        </div>
+                    </div>
+                    
+                    <div class="metrics-panel">
+                        <div class="metric-card">
+                            <div class="metric-name">Decision Tree</div>
+                            <div class="metric-stats">
+                                <div class="metric-stat">
+                                    <div class="metric-stat-label">Precision</div>
+                                    <div class="metric-stat-value">0.82</div>
+                                </div>
+                                <div class="metric-stat">
+                                    <div class="metric-stat-label">Recall</div>
+                                    <div class="metric-stat-value">0.85</div>
+                                </div>
+                                <div class="metric-stat">
+                                    <div class="metric-stat-label">F1</div>
+                                    <div class="metric-stat-value">0.83</div>
+                                </div>
+                            </div>
+                        </div>
+                        
+                        <div class="metric-card">
+                            <div class="metric-name">Gradient Boosting</div>
+                            <div class="metric-stats">
+                                <div class="metric-stat">
+                                    <div class="metric-stat-label">Precision</div>
+                                    <div class="metric-stat-value">0.78</div>
+                                </div>
+                                <div class="metric-stat">
+                                    <div class="metric-stat-label">Recall</div>
+                                    <div class="metric-stat-value">0.80</div>
+                                </div>
+                                <div class="metric-stat">
+                                    <div class="metric-stat-label">F1</div>
+                                    <div class="metric-stat-value">0.79</div>
+                                </div>
+                            </div>
+                        </div>
+                        
+                        <div class="metric-card winner">
+                            <div class="metric-name">Random Forest 🏆</div>
+                            <div class="metric-stats">
+                                <div class="metric-stat">
+                                    <div class="metric-stat-label">Precision</div>
+                                    <div class="metric-stat-value">0.90</div>
+                                </div>
+                                <div class="metric-stat">
+                                    <div class="metric-stat-label">Recall</div>
+                                    <div class="metric-stat-value">0.92</div>
+                                </div>
+                                <div class="metric-stat">
+                                    <div class="metric-stat-label">F1</div>
+                                    <div class="metric-stat-value">0.91</div>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+            
+            <div class="orbit-container">
+                <div class="orbit-node"></div>
+                <div class="orbit-node"></div>
+                <div class="orbit-node"></div>
+                <div class="orbit-node"></div>
+            </div>
+        </div>
+
+        <!-- Slide 4: Feature Importance -->
+        <div class="slide features-slide">
+            <div class="features-content">
+                <h2 class="section-header">KEY PREDICTIVE FACTORS</h2>
+                <div class="features-grid">
+                    <div class="feature-card">
+                        <div class="feature-number">1</div>
+                        <div class="feature-title">Prior Education Level</div>
+                        <div class="feature-impact">
+                            20% distinction rate for A-Level or above vs 50% withdrawal for no formal qualifications
+                        </div>
+                    </div>
+                    <div class="feature-card">
+                        <div class="feature-number">2</div>
+                        <div class="feature-title">IMD Band (Socioeconomic)</div>
+                        <div class="feature-impact">
+                            High IMD (70-100%) show significantly better outcomes, low IMD (0-30%) face 45% withdrawal
+                        </div>
+                    </div>
+                    <div class="feature-card">
+                        <div class="feature-number">3</div>
+                        <div class="feature-title">Age Band</div>
+                        <div class="feature-impact">
+                            Students 0-35 years: 15% distinction rate; 55+ years: 50% withdrawal rate
+                        </div>
+                    </div>
+                    <div class="feature-card">
+                        <div class="feature-number">4</div>
+                        <div class="feature-title">VLE Engagement</div>
+                        <div class="feature-impact">
+                            Login frequency and resource access strongly correlate with academic success
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <!-- Slide 5: Key Findings -->
+        <div class="slide findings-slide">
+            <div class="findings-content">
+                <h2 class="section-header">RESEARCH FINDINGS</h2>
+                <div class="findings-grid">
+                    <div class="finding-card">
+                        <div class="finding-stat">20%</div>
+                        <div class="finding-title">Educational Background</div>
+                        <div class="finding-desc">
+                            Students with A-Level qualifications achieved distinction rates of 20%, demonstrating the critical role of prior education
+                        </div>
+                    </div>
+                    <div class="finding-card">
+                        <div class="finding-stat">45%</div>
+                        <div class="finding-title">Socioeconomic Impact</div>
+                        <div class="finding-desc">
+                            Low IMD band students (0-30%) showed 45% withdrawal rates, highlighting systemic educational inequalities
+                        </div>
+                    </div>
+                    <div class="finding-card">
+                        <div class="finding-stat">50%</div>
+                        <div class="finding-title">Age Factor</div>
+                        <div class="finding-desc">
+                            Students aged 55+ experienced 50% withdrawal rates, indicating need for age-specific support systems
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <!-- Slide 6: Conclusion -->
+        <div class="slide conclusion-slide">
+            <div class="particles" id="particlesConclusion"></div>
+            <div class="conclusion-content">
+                <h2 class="section-header">CONCLUSION</h2>
+                <div class="conclusion-text">
+                    This research demonstrates that machine learning can effectively predict academic outcomes in Virtual Learning Environments with <span class="highlight">98.3% accuracy</span> using Random Forest classification.
+                    <br><br>
+                    By combining demographics, engagement metrics, and assessment data, we provide educators with <span class="highlight">actionable insights</span> for early intervention, ultimately improving student retention and success in online education.
+                    <br><br>
+                    <strong>Thank you!</strong>
+                </div>
+            </div>
+        </div>
+
+        <!-- Navigation -->
+        <div class="nav-controls">
+            <button class="nav-button" onclick="prevSlide()">← Previous</button>
+            <div class="slide-indicator">
+                <div class="dot active" onclick="goToSlide(0)"></div>
+                <div class="dot" onclick="goToSlide(1)"></div>
+                <div class="dot" onclick="goToSlide(2)"></div>
+                <div class="dot" onclick="goToSlide(3)"></div>
+                <div class="dot" onclick="goToSlide(4)"></div>
+                <div class="dot" onclick="goToSlide(5)"></div>
+            </div>
+            <button class="nav-button" onclick="nextSlide()">Next →</button>
+        </div>
+        
+        <div class="page-number" id="pageNumber">1 / 6</div>
+    </div>
+
+    <script>
+        let currentSlide = 0;
+        const slides = document.querySelectorAll('.slide');
+        const dots = document.querySelectorAll('.dot');
+        
+        // Create floating particles
+        function createParticles(container, count) {
+            for (let i = 0; i < count; i++) {
+                const particle = document.createElement('div');
+                particle.className = 'particle';
+                particle.style.left = Math.random() * 100 + '%';
+                particle.style.animationDelay = Math.random() * 15 + 's';
+                particle.style.animationDuration = (10 + Math.random() * 10) + 's';
+                container.appendChild(particle);
+            }
+        }
+        
+        // Create data nodes
+        function createDataNodes(container, count) {
+            for (let i = 0; i < count; i++) {
+                const node = document.createElement('div');
+                node.className = 'data-node';
+                node.style.left = Math.random() * 100 + '%';
+                node.style.top = Math.random() * 100 + '%';
+                node.style.animationDelay = Math.random() * 8 + 's';
+                container.appendChild(node);
+            }
+        }
+        
+        // Create data streams
+        function createDataStreams(container, count) {
+            for (let i = 0; i < count; i++) {
+                const stream = document.createElement('div');
+                stream.className = 'data-stream';
+                stream.style.left = Math.random() * 100 + '%';
+                stream.style.animationDelay = Math.random() * 3 + 's';
+                container.appendChild(stream);
+            }
+        }
+        
+        // Initialize animations
+        createParticles(document.getElementById('particles'), 30);
+        createParticles(document.getElementById('particlesConclusion'), 30);
+        createDataNodes(document.getElementById('dataNodes'), 15);
+        
+        const dataStreamsContainer = document.getElementById('dataStreams');
+        if (dataStreamsContainer) {
+            createDataStreams(dataStreamsContainer, 8);
+        }
+        
+        // Animated counter
+        function animateCounter(element) {
+            const target = parseInt(element.dataset.target);
+            const duration = 2000;
+            const step = target / (duration / 16);
+            let current = 0;
+            
+            const timer = setInterval(() => {
+                current += step;
+                if (current >= target) {
+                    element.textContent = target.toLocaleString();
+                    clearInterval(timer);
+                } else {
+                    element.textContent = Math.floor(current).toLocaleString();
+                }
+            }, 16);
+        }
+        
+        // Slide navigation
+        function showSlide(index) {
+            slides.forEach((slide, i) => {
+                slide.classList.remove('active');
+                dots[i].classList.remove('active');
+            });
+            
+            slides[index].classList.add('active');
+            dots[index].classList.add('active');
+            
+            // Update page number
+            document.getElementById('pageNumber').textContent = `${index + 1} / ${slides.length}`;
+            
+            // Trigger counter animation on dataset slide
+            if (index === 1) {
+                const counter = slides[index].querySelector('.counter');
+                if (counter && counter.textContent === '0') {
+                    setTimeout(() => animateCounter(counter), 300);
+                }
+            }
+        }
+        
+        function nextSlide() {
+            currentSlide = (currentSlide + 1) % slides.length;
+            showSlide(currentSlide);
+        }
+        
+        function prevSlide() {
+            currentSlide = (currentSlide - 1 + slides.length) % slides.length;
+            showSlide(currentSlide);
+        }
+        
+        function goToSlide(index) {
+            currentSlide = index;
+            showSlide(currentSlide);
+        }
+        
+        // Keyboard navigation
+        document.addEventListener('keydown', (e) => {
+            if (e.key === 'ArrowRight' || e.key === ' ') {
+                nextSlide();
+            } else if (e.key === 'ArrowLeft') {
+                prevSlide();
+            }
+        });
+        
+        // Auto-advance (optional - remove if you want manual control)
+        // setInterval(nextSlide, 10000);
+    </script>
+</body>
+</html>
